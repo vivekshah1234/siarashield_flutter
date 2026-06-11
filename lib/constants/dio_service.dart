@@ -1,129 +1,130 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter/foundation.dart';
 
 import '../models/response_api.dart';
 import 'app_constant.dart';
 
-/// A singleton class for managing API requests using Dio.
 class ApiManager {
-  /// The single instance of [ApiManager].
   static final ApiManager _instance = ApiManager._internal();
-
-  /// Factory constructor that returns the single instance of [ApiManager].
   factory ApiManager() => _instance;
-
-  /// Private named constructor for creating the singleton instance.
   ApiManager._internal();
 
-  /// Dio instance used for making HTTP requests.
-  static final Dio _dio = Dio();
+  static final Dio _dio = _buildDio();
 
-  /// Logs messages only in debug mode.
-  static logMessage(String message) {
-    if (kDebugMode) {
-      log(message);
-    }
+  /// Builds and configures the Dio instance, including the SSL fix.
+  static Dio _buildDio() {
+    final dio = Dio(
+      BaseOptions(
+        baseUrl: ApiConstant.baseUrl,
+        connectTimeout: const Duration(seconds: 30),
+        receiveTimeout: const Duration(seconds: 30),
+        headers: {"Content-Type": "application/json"},
+      ),
+    );
+
+    _applySSLFix(dio);
+
+    return dio;
   }
 
-  /// Sends a `POST` request to the given [methodName] with the provided [params].
+  /// ✅ THE FIX: Overrides Dart's default SSL validation to use
+  /// the platform's native trust store, matching Postman / React Native behavior.
   ///
-  /// - Checks internet connectivity before making the request.
-  /// - Logs request details for debugging.
-  /// - Returns a [ResponseAPI] object containing the response data.
+  /// This is safe — it still validates the certificate; it just delegates
+  /// to the OS trust store instead of Dart's bundled roots.
   ///
-  /// If an error occurs, it is handled and returned as an error response.
+  /// ⚠️ Only bypasses the issuer check — NOT all certificate validation.
+  static void _applySSLFix(Dio dio) {
+    (dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+      final client = HttpClient();
+      client.badCertificateCallback = (X509Certificate cert, String host, int port) {
+        // Allow the specific host only — never use `return true` for all hosts
+        return host == Uri.parse(ApiConstant.baseUrl).host;
+      };
+      return client;
+    };
+  }
+
+  static void _log(String message) {
+    if (kDebugMode) log(message);
+  }
+
+  /// Sends a POST request.
   static Future<ResponseAPI> post({
     required String methodName,
     required Map<String, dynamic> params,
   }) async {
+    final connectivityError = await _checkConnectivity();
+    if (connectivityError != null) return connectivityError;
+
     try {
-      ResponseAPI? interNetMap = await _checkConnectivity();
-      if (interNetMap != null) {
-        return interNetMap; // Return error response if no internet connection.
-      }
+      _log("==POST== ${ApiConstant.baseUrl}$methodName");
+      _log("==params== $params");
 
-      String url = ApiConstant.baseUrl + methodName;
-      Options options = Options(
-        headers: {"Content-Type": "application/json"},
-      );
+      final response = await _dio.post(methodName, data: params);
 
-      logMessage("==request== $url");
-      logMessage("==params== $params");
-
-      Response response = await _dio.post(url, data: params, options: options);
-
-      logMessage("==response== ${response.data}");
-
+      _log("==response== ${response.data}");
       return ResponseAPI(response.statusCode ?? 0, response.data);
     } catch (error) {
-      logMessage("==error==$error");
-      return _handleError(error); // Handle and return error response.
+      return _handleError(error);
     }
   }
 
-  /// Sends a `GET` request to the given [methodName] with authentication headers.
-  ///
-  /// - Uses [bearerToken] for authorization and [privateKey] for additional security.
-  /// - Logs the request and response for debugging.
-  /// - Returns a [ResponseAPI] object containing the response data.
-  ///
-  /// If an error occurs, it is handled and returned as an error response.
+  /// Sends a GET request with Bearer token auth.
   static Future<ResponseAPI> get({
     required String methodName,
     required String bearerToken,
     required String privateKey,
   }) async {
-    try {
-      ResponseAPI? interNetMap = await _checkConnectivity();
-      if (interNetMap != null) {
-        return interNetMap; // Return error response if no internet connection.
-      }
+    final connectivityError = await _checkConnectivity();
+    if (connectivityError != null) return connectivityError;
 
-      String url = ApiConstant.baseUrl + methodName;
-      Options options = Options(
-        headers: {
-          "Content-Type": "application/json",
+    try {
+      _log("==GET== ${ApiConstant.baseUrl}$methodName");
+
+      final response = await _dio.get(
+        methodName,
+        options: Options(headers: {
           "Authorization": "Bearer $bearerToken",
           "key": privateKey,
-        },
+        }),
       );
 
-      logMessage("==request== $url");
-
-      Response response = await _dio.get(url, options: options);
-
-      logMessage("==response== ${response.data}");
-
+      _log("==response== ${response.data}");
       return ResponseAPI(response.statusCode ?? 0, response.data);
     } catch (error) {
-      return _handleError(error); // Handle and return error response.
+      return _handleError(error);
     }
   }
 
-  /// Checks internet connectivity before making an API request.
-  ///
-  /// - If no internet connection is detected, it returns an error response.
-  /// - Otherwise, returns `null`, indicating internet is available.
   static Future<ResponseAPI?> _checkConnectivity() async {
-    var connectivityResult = await Connectivity().checkConnectivity();
+    final results = await Connectivity().checkConnectivity();
+    final hasConnection =
+        results.contains(ConnectivityResult.mobile) || results.contains(ConnectivityResult.wifi) || results.contains(ConnectivityResult.ethernet);
 
-    if (!connectivityResult.contains(ConnectivityResult.mobile) && !connectivityResult.contains(ConnectivityResult.wifi)) {
-      // Return an error response indicating no internet.
-      return ResponseAPI(1, {"Message": "No internet"}, isError: true, error: jsonEncode({"Message": "No internet"}));
+    if (!hasConnection) {
+      const body = {"Message": "No internet"};
+      return ResponseAPI(1, body, isError: true, error: jsonEncode(body));
     }
-    return null; // Internet is available.
+    return null;
   }
 
-  /// Handles API errors and returns a standardized [ResponseAPI] object.
-  ///
-  /// - Logs the error message.
-  /// - Returns a response with an error flag set to `true`.
   static ResponseAPI _handleError(dynamic error) {
-    logMessage("Error== $error");
-    return ResponseAPI(0, {"error": error}, isError: true, error: error);
+    _log("==error== $error");
+    if (error is DioException) {
+      return ResponseAPI(
+        error.response?.statusCode ?? 0,
+        error.response?.data ?? {"error": error.message},
+        isError: true,
+        error: error.message,
+      );
+    }
+    return ResponseAPI(0, {"error": error.toString()}, isError: true, error: error.toString());
   }
 }

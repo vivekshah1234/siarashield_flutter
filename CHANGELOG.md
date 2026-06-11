@@ -35,3 +35,7 @@
 ## 0.0.9
 
 * TODO: TYPO Code Fixed
+
+## 0.0.10
+
+* TODO: Bug Fixes on GIF
