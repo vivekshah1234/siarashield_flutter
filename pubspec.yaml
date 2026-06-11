@@ -24,7 +24,7 @@ dependencies:
   dio: ^5.7.0
   shared_preferences: ^2.3.5
   flutter_cache_manager: ^3.4.1
-
+  http: ^1.6.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
