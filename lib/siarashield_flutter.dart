@@ -137,7 +137,7 @@ class _CyberSiaraWidgetState extends State<CyberSiaraWidget> {
     if (!context.mounted) return;
 
     /// Attempt to verify the user using the slide button.
-    await controller.slideButton(context, widget.cyberSiaraModel);
+    await controller.slideButton(widget.cyberSiaraModel);
 
     if (controller.isVerified.value) {
       /// If the slide verification is successful, store the authentication token.

@@ -1,14 +1,13 @@
-import 'dart:io';
-
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter_udid/flutter_udid.dart';
+// import 'package:flutter_udid/flutter_udid.dart';
 import 'package:get/get.dart';
-import 'package:public_ip_address/public_ip_address.dart';
 import 'package:siarashield_flutter/constants/app_constant.dart';
 import 'package:siarashield_flutter/constants/dio_service.dart';
 
 import '../common/custom_widgets.dart';
 import '../models/response_api.dart';
+import '../services/generate_random_id.dart';
+import '../services/get_device_infomation.dart';
+import '../services/get_ip_address.dart';
 import '../siarashield_flutter.dart';
 
 class PopupController extends GetxController {
@@ -16,16 +15,11 @@ class PopupController extends GetxController {
   RxBool isOtherLoading = false.obs;
   RxString error = "".obs;
 
-  RxString requestId = "".obs;
-  RxString visiterId = "".obs;
   String deviceName = "";
+  String deviceType = "";
   String deviceIp = "";
   String udid = "";
   RxBool isVerified = false.obs;
-
-  final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  final IpAddress _ipAddress = IpAddress();
-
   RxString captchaUrl = "".obs;
 
   /// Fetches a CAPTCHA challenge for user verification.
@@ -62,33 +56,42 @@ class PopupController extends GetxController {
   /// Returns:
   /// - Updates the `captchaUrl` observable with the CAPTCHA HTML.
   /// - Displays an error toast in case of failure.
-  getCaptcha({required double height, required double width, required String visiterId, required CyberSiaraModel cieraModel}) async {
+  getCaptcha(
+      {required double height,
+      required double width,
+      required String visiterId,
+      required String requestId,
+      required CyberSiaraModel cieraModel}) async {
     isOtherLoading(true);
     error("");
     captchaUrl("");
     try {
-      deviceName = "";
-      deviceIp = await _ipAddress.getIp();
-      udid = await FlutterUdid.udid;
-
-      if (Platform.isAndroid) {
-        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-        deviceName = androidInfo.brand;
-      } else {
-        IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-        deviceName = iosInfo.model;
-      }
+      deviceIp = await getPublicIp() ?? "";
+      udid = await generateBrowserIdentity();
+      deviceName = await getDeviceName();
+      deviceType = getDeviceType();
       Map<String, dynamic> map = {
         "MasterUrlId": cieraModel.masterUrlId, // "VYz433DfqQ5LhBcgaamnbw4Wy4K9CyQT",
         "RequestUrl": cieraModel.requestUrl, // "com.app.cyber_ceiara",
+
         "BrowserIdentity": udid,
-        "DeviceIp": deviceIp,
-        "DeviceType": Platform.isAndroid ? "Android" : "ios",
-        "DeviceBrowser": 'Chrome',
+
+        "DeviceType": deviceType,
+
         "DeviceName": deviceName,
         "DeviceHeight": height.round(),
         "DeviceWidth": width.round(),
+        "RequestID": requestId,
         "VisiterId": visiterId,
+        "RequestType": "Open",
+        "PluginNo": 0,
+        "LanguageId": 1,
+        "LangChange": 0,
+        "ClickSecond": 1,
+        "Iscookie": 1,
+
+        // "DeviceIp": deviceIp,
+        // "DeviceBrowser": 'Chrome',
       };
       ResponseAPI responseAPI = await ApiManager.post(methodName: ApiConstant.captchaForAndroid, params: map);
       Map<String, dynamic> valueMap = responseAPI.response;
@@ -148,7 +151,7 @@ class PopupController extends GetxController {
       Map<String, dynamic> map = {
         "MasterUrl": cieraModel.masterUrlId,
         "DeviceIp": deviceIp,
-        "DeviceType": Platform.isAndroid ? "Android" : "ios",
+        "DeviceType": deviceType,
         "DeviceName": deviceName,
         "UserCaptcha": txt,
         "ByPass": "Netural",

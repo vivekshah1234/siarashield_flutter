@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:siarashield_flutter/constants/app_constant.dart';
+import 'package:siarashield_flutter/network_image_handler/network_image_handler.dart';
 
 import 'common/custom_widgets.dart';
 import 'controllers/popoup_controller.dart';
@@ -31,13 +33,18 @@ class _PopupScreenState extends State<PopupScreen> {
     return GetX<PopupController>(
       init: PopupController(),
       initState: (val) {
-        val.controller
-            ?.getCaptcha(height: screenHeight(context), width: screenWidth(context), visiterId: widget.visiterId, cieraModel: widget.cieraModel);
+        val.controller?.getCaptcha(
+            height: screenHeight(context),
+            width: screenWidth(context),
+            visiterId: widget.visiterId,
+            requestId: widget.requestId,
+            cieraModel: widget.cieraModel);
       },
       builder: (controller) {
         return LoadingStateWidget(
           isLoading: controller.isLoading.value,
           child: Container(
+            width: kIsWeb ? 380 : null,
             padding: const EdgeInsets.only(left: 5, right: 5),
             decoration: BoxDecoration(color: AppColors.whiteColor, borderRadius: BorderRadius.circular(5)),
             child: Column(
@@ -75,7 +82,7 @@ class _PopupScreenState extends State<PopupScreen> {
                       child: controller.isOtherLoading.value
                           ? const LoadingWidget()
                           : SizedBox(
-                              height: 60,
+                              height: kIsWeb ? 75 : 60,
                               width: double.infinity,
                               child: cachedImageForItem(controller.captchaUrl.value, height: 60, boxFit: BoxFit.fitWidth),
                             ),
@@ -180,7 +187,12 @@ class _PopupScreenState extends State<PopupScreen> {
         if (!context.mounted) return;
 
         /// Reload the captcha with updated parameters to allow the user to retry.
-        controller.getCaptcha(height: screenHeight(context), width: screenWidth(context), visiterId: widget.visiterId, cieraModel: widget.cieraModel);
+        controller.getCaptcha(
+            height: screenHeight(context),
+            width: screenWidth(context),
+            visiterId: widget.visiterId,
+            requestId: widget.requestId,
+            cieraModel: widget.cieraModel);
       }
     }
   }
@@ -189,7 +201,12 @@ class _PopupScreenState extends State<PopupScreen> {
   /// This is triggered when the user enters an incorrect captcha code,
   /// allowing them to retry with a fresh challenge.
   _changeCaptcha(PopupController controller) {
-    controller.getCaptcha(height: screenHeight(context), width: screenWidth(context), visiterId: widget.visiterId, cieraModel: widget.cieraModel);
+    controller.getCaptcha(
+        height: screenHeight(context),
+        width: screenWidth(context),
+        visiterId: widget.visiterId,
+        requestId: widget.requestId,
+        cieraModel: widget.cieraModel);
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:siarashield_flutter/common/custom_widgets.dart';
@@ -35,118 +36,114 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors1.whiteColor,
-      body: Container(
-        margin: EdgeInsets.only(top: screenHeight(context) * 0.15, right: 15, left: 15),
-        decoration: const BoxDecoration(
-            color: AppColors1.whiteColor,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(5),
-              topRight: Radius.circular(5),
-              bottomLeft: Radius.circular(5),
-              bottomRight: Radius.circular(5),
-            )),
-        child: Column(
-          children: [
-            Center(
-                child: Image.asset(
-              ImageAssets.logo,
-              scale: 1,
-              package: 'siarashield_flutter',
-            )),
-            const SizedBox(
-              height: 15,
-            ),
-            TextFormField(
-                controller: _txtUsername,
-                cursorColor: AppColors1.blackColor,
-                style: _labelStyle,
-                textInputAction: TextInputAction.done,
-                decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.only(left: 10),
-                    disabledBorder: border,
-                    errorBorder: border,
-                    focusedBorder: border,
-                    enabledBorder: border,
-                    hintText: "Example@email.com",
-                    hintStyle: _hintStyle,
-                    labelText: "Email",
-                    labelStyle: _labelStyle,
-                    suffixIcon: Icon(
-                      Icons.email_outlined,
-                      color: AppColors1.yellowColor,
-                    ))).putPadding(15, 15),
-            const SizedBox(
-              height: 15,
-            ),
-            TextFormField(
-                controller: _password,
-                obscureText: true,
-                cursorColor: AppColors1.blackColor,
-                style: _labelStyle,
-                textInputAction: TextInputAction.done,
-                decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.only(left: 10),
-                    disabledBorder: border,
-                    errorBorder: border,
-                    focusedBorder: border,
-                    enabledBorder: border,
-                    hintText: "*******",
-                    hintStyle: _hintStyle,
-                    labelText: "Password",
-                    labelStyle: _labelStyle,
-                    suffixIcon: Icon(
-                      Icons.lock,
-                      color: AppColors1.yellowColor,
-                    ))).putPadding(15, 15),
-            const SizedBox(
-              height: 10,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Checkbox(
-                    value: isCheck,
-                    onChanged: (val) {
-                      isCheck = !isCheck;
-                      setState(() {});
-                    }),
-                Text(
-                  "Remember password",
-                  style: _subtitle,
-                )
-              ],
-            ).putPadding(15, 15),
-            Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: CyberSiaraWidget(
-                loginTap: (bool isSuccess) {
-                  if (isSuccess) {
-                    // Handle successful authentication
-                    log("Authentication Successful: \$isSuccess");
+      body: Center(
+        child: Container(
+          margin: EdgeInsets.only(top: screenHeight(context) * 0.15, right: 15, left: 15),
+          width: kIsWeb ? 450 : null,
+          decoration: BoxDecoration(color: AppColors1.whiteColor, borderRadius: BorderRadius.circular(5)),
+          child: Column(
+            children: [
+              Center(
+                  child: Image.asset(
+                ImageAssets.logo,
+                scale: 1,
+                package: 'siarashield_flutter',
+              )),
+              const SizedBox(
+                height: 15,
+              ),
+              TextFormField(
+                  controller: _txtUsername,
+                  cursorColor: AppColors1.blackColor,
+                  style: _labelStyle,
+                  textInputAction: TextInputAction.done,
+                  decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.only(left: 10),
+                      disabledBorder: border,
+                      errorBorder: border,
+                      focusedBorder: border,
+                      enabledBorder: border,
+                      hintText: "Example@email.com",
+                      hintStyle: _hintStyle,
+                      labelText: "Email",
+                      labelStyle: _labelStyle,
+                      suffixIcon: Icon(
+                        Icons.email_outlined,
+                        color: AppColors1.yellowColor,
+                      ))).putPadding(15, 15),
+              const SizedBox(
+                height: 15,
+              ),
+              TextFormField(
+                  controller: _password,
+                  obscureText: true,
+                  cursorColor: AppColors1.blackColor,
+                  style: _labelStyle,
+                  textInputAction: TextInputAction.done,
+                  decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.only(left: 10),
+                      disabledBorder: border,
+                      errorBorder: border,
+                      focusedBorder: border,
+                      enabledBorder: border,
+                      hintText: "*******",
+                      hintStyle: _hintStyle,
+                      labelText: "Password",
+                      labelStyle: _labelStyle,
+                      suffixIcon: Icon(
+                        Icons.lock,
+                        color: AppColors1.yellowColor,
+                      ))).putPadding(15, 15),
+              const SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Checkbox(
+                      value: isCheck,
+                      onChanged: (val) {
+                        isCheck = !isCheck;
+                        setState(() {});
+                      }),
+                  Text(
+                    "Remember password",
+                    style: _subtitle,
+                  )
+                ],
+              ).putPadding(15, 15),
+              Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: CyberSiaraWidget(
+                  loginTap: (bool isSuccess) {
+                    if (isSuccess) {
+                      // Handle successful authentication
+                      log("Authentication Successful: \$isSuccess");
 
-                    if (_txtUsername.text.isEmpty) {
-                      toast("Email can't be empty");
-                      return;
+                      if (_txtUsername.text.isEmpty) {
+                        toast("Email can't be empty");
+                        return;
+                      }
+                      if (_password.text.isEmpty) {
+                        toast("Password can't be empty");
+                        return;
+                      }
+                      Get.to(() => const SecondScreen());
+                    } else {
+                      // Handle authentication failure
+                      log("Authentication Failed");
                     }
-                    if (_password.text.isEmpty) {
-                      toast("Password can't be empty");
-                      return;
-                    }
-                    Get.to(() => const SecondScreen());
-                  } else {
-                    // Handle authentication failure
-                    log("Authentication Failed");
-                  }
-                },
-                cyberSiaraModel: CyberSiaraModel(
-                  masterUrlId: 'kMcFLdqYxN2j1HduZu6uO54hHjzKKBQz', //Master URl ID
-                  requestUrl: 'com.app.cyber_ceiara', //Package name,
-                  privateKey: "8KWfnvAJH9kfI9LlUwfBfg1gKP7ddGns", //Private Key
+                  },
+                  cyberSiaraModel: CyberSiaraModel(
+                    masterUrlId: 'kMcFLdqYxN2j1HduZu6uO54hHjzKKBQz', //Master URl ID
+                    requestUrl: 'com.app.cyber_ceiara', //Package name,
+                    privateKey: "8KWfnvAJH9kfI9LlUwfBfg1gKP7ddGns", //Private Key
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

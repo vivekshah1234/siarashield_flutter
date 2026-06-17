@@ -27,9 +27,9 @@ class ApiManager {
         headers: {"Content-Type": "application/json"},
       ),
     );
-
-    _applySSLFix(dio);
-
+    if (kIsWeb == false) {
+      _applySSLFix(dio);
+    }
     return dio;
   }
 

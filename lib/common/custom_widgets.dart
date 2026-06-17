@@ -1,9 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:siarashield_flutter/constants/app_constant.dart';
-
-import '../constants/cache_manager.dart';
 
 screenHeight(BuildContext context) => MediaQuery.of(context).size.height;
 
@@ -43,17 +40,6 @@ class LoadingStateWidget extends StatelessWidget {
         ignoring: isLoading, child: Stack(alignment: Alignment.center, children: [child, isLoading ? const LoadingWidget() : const SizedBox()]));
   }
 }
-
-Widget cachedImageForItem(String url, {double? height, double? width, BoxFit? boxFit}) => CachedNetworkImage(
-    imageUrl: url,
-    height: height,
-    width: width,
-    fit: boxFit,
-    cacheManager: CustomCacheManager(), // ← inject custom client
-    placeholder: (context, url) => const LoadingWidget(),
-    errorWidget: (context, url, error) => const Icon(
-          Icons.error,
-        ));
 
 class AppButton extends StatelessWidget {
   final GestureTapCallback onTap;

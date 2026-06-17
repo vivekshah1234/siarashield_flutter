@@ -6,6 +6,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SharedPrefrenceStorage {
   /// Key used to store the authentication token in SharedPreferences.
   static const String token = 'token';
+
+  /// Key used to store the browser ID in SharedPreferences.
+  static const String browserId = "browserId";
 }
 
 /// Stores the given token data in SharedPreferences.
@@ -39,4 +42,23 @@ Future<Map<String, dynamic>?> getToken() async {
 Future<void> removeToken() async {
   SharedPreferences sp = await SharedPreferences.getInstance();
   sp.remove(SharedPrefrenceStorage.token); // Delete the stored token.
+}
+
+/// Stores the given browserId data in SharedPreferences.
+Future<void> setBrowserId(String id) async {
+  SharedPreferences sp = await SharedPreferences.getInstance();
+  sp.setString(SharedPrefrenceStorage.browserId, id); // Save the token.
+}
+
+/// Retrieves the stored browserId from SharedPreferences.
+Future<String?> getBrowserId() async {
+  SharedPreferences sp = await SharedPreferences.getInstance();
+  String? data = sp.getString(SharedPrefrenceStorage.browserId); // Get stored token.
+  return data;
+}
+
+/// Removes the stored browserId from SharedPreferences.
+Future<void> removeBrowserId(String id) async {
+  SharedPreferences sp = await SharedPreferences.getInstance();
+  sp.remove(SharedPrefrenceStorage.browserId); // Save the token.
 }

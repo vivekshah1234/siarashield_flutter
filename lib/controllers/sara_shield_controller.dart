@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter_udid/flutter_udid.dart';
+// import 'package:flutter_udid/flutter_udid.dart';
 import 'package:get/get.dart';
-import 'package:public_ip_address/public_ip_address.dart';
 import 'package:siarashield_flutter/constants/app_constant.dart';
 import 'package:siarashield_flutter/constants/dio_service.dart';
 import 'package:siarashield_flutter/constants/shared_prefrence_storage.dart';
@@ -11,6 +8,9 @@ import 'package:siarashield_flutter/constants/shared_prefrence_storage.dart';
 import '../common/custom_widgets.dart';
 import '../models/get_info_model.dart';
 import '../models/response_api.dart';
+import '../services/generate_random_id.dart';
+import '../services/get_device_infomation.dart';
+import '../services/get_ip_address.dart';
 import '../siarashield_flutter.dart';
 
 class SaraShieldController extends GetxController {
@@ -20,7 +20,6 @@ class SaraShieldController extends GetxController {
   RxString apiError = "".obs;
 
   final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  final IpAddress _ipAddress = IpAddress();
   RxString requestId = "".obs;
   RxString visiterId = "".obs;
 
@@ -60,23 +59,18 @@ class SaraShieldController extends GetxController {
     removeToken();
     try {
       deviceName = "";
-      deviceIp = await _ipAddress.getIp();
-      udid = await FlutterUdid.udid;
+      deviceIp = await getPublicIp() ?? "";
 
-      if (Platform.isAndroid) {
-        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-        deviceName = androidInfo.brand;
-      } else {
-        IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-        deviceName = iosInfo.model;
-      }
+      udid = await generateBrowserIdentity();
 
+      deviceName = await getDeviceName();
+      String deviceType = getDeviceType();
       Map<String, dynamic> map = {
         "MasterUrlId": cieraModel.masterUrlId, // "VYz433DfqQ5LhBcgaamnbw4Wy4K9CyQT",
         "RequestUrl": cieraModel.requestUrl, // "com.app.cyber_ceiara",
         "BrowserIdentity": udid,
         "DeviceIp": deviceIp,
-        "DeviceType": Platform.isAndroid ? "Android" : "ios",
+        "DeviceType": deviceType,
         "DeviceBrowser": 'Chrome',
         "DeviceName": deviceName,
         "DeviceHeight": height.round(),
@@ -123,7 +117,7 @@ class SaraShieldController extends GetxController {
   /// 6. If API response is `"fail"`, sets `isVerified` to `false`.
   /// 7. Handles API errors and unexpected exceptions, displaying appropriate error messages.
   /// 8. Resets `isOtherLoading` to `false` in the `finally` block.
-  slideButton(context, CyberSiaraModel cieraModel) async {
+  slideButton(CyberSiaraModel cieraModel) async {
     isVerified(false);
     isOtherLoading(true);
     error("");
@@ -133,8 +127,6 @@ class SaraShieldController extends GetxController {
       "BrowserIdentity": udid,
       "DeviceIp": deviceIp,
       "DeviceName": deviceName,
-      // "DeviceType": Platform.isAndroid ? "Android" : "ios",
-      // "DeviceBrowser": 'Chrome',
       "Protocol": "http",
       "second": "5",
       "RequestID": requestId.value,
