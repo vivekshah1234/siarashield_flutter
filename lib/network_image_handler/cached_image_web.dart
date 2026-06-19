@@ -1,17 +1,17 @@
+import 'dart:html' as html;
 import 'dart:ui_web' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:web/web.dart' as web;
 
 /// Registers a custom HTML ImageElement for Flutter Web.
 /// This is mainly used to render image formats (such as GIFs)
 /// that may not behave correctly with Flutter's default image widgets.
-
+///
 /// [url]    -> Image URL to be displayed.
 /// [viewId] -> Unique identifier used by HtmlElementView.
 void registerGifView(String url, String viewId) {
   ui.platformViewRegistry.registerViewFactory(viewId, (int id) {
-    return web.HTMLImageElement()
+    return html.ImageElement()
       ..src = url
       ..style.width = '100%'
       ..style.height = '100%'
@@ -20,7 +20,7 @@ void registerGifView(String url, String viewId) {
 }
 
 /// Web-specific image widget.
-
+///
 /// Creates an [HtmlElementView] that renders an underlying
 /// HTML `<img>` element. Useful for displaying GIFs or images
 /// directly through the browser rendering engine.
@@ -33,12 +33,11 @@ void registerGifView(String url, String viewId) {
 ///
 /// Returns a [SizedBox] containing an [HtmlElementView].
 Widget cachedImageForItem(
-  String url, {
-  double? height,
-  double? width,
-  BoxFit? boxFit,
-}) {
-  // print("web side ");
+    String url, {
+      double? height,
+      double? width,
+      BoxFit? boxFit,
+    }) {
   final viewId = 'img-view-${url.hashCode}';
 
   registerGifView(url, viewId);

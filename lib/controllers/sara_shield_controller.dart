@@ -9,7 +9,7 @@ import '../common/custom_widgets.dart';
 import '../models/get_info_model.dart';
 import '../models/response_api.dart';
 import '../services/generate_random_id.dart';
-import '../services/get_browser_name.dart';
+import '../services/browser_name/get_browser_name.dart';
 import '../services/get_device_information.dart';
 import '../services/get_ip_address.dart';
 import '../siarashield_flutter.dart';
