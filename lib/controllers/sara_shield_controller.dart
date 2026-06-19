@@ -1,5 +1,5 @@
 import 'package:device_info_plus/device_info_plus.dart';
-// import 'package:flutter_udid/flutter_udid.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:siarashield_flutter/constants/app_constant.dart';
 import 'package:siarashield_flutter/constants/dio_service.dart';
@@ -9,7 +9,8 @@ import '../common/custom_widgets.dart';
 import '../models/get_info_model.dart';
 import '../models/response_api.dart';
 import '../services/generate_random_id.dart';
-import '../services/get_device_infomation.dart';
+import '../services/get_browser_name.dart';
+import '../services/get_device_information.dart';
 import '../services/get_ip_address.dart';
 import '../siarashield_flutter.dart';
 
@@ -28,6 +29,18 @@ class SaraShieldController extends GetxController {
   String udid = "";
 
   RxBool isVerified = false.obs;
+
+  DateTime? captchaOpenedAt;
+
+  void startCaptchaTimer() {
+    captchaOpenedAt = DateTime.now();
+  }
+
+  int get timeSpentInSeconds {
+    if (captchaOpenedAt == null) return 0;
+
+    return DateTime.now().difference(captchaOpenedAt!).inSeconds;
+  }
 
   /// Fetches and sends device information to the CyberCiera API.
   ///
@@ -57,6 +70,7 @@ class SaraShieldController extends GetxController {
     requestId("");
     visiterId("");
     removeToken();
+    captchaOpenedAt = null;
     try {
       deviceName = "";
       deviceIp = await getPublicIp() ?? "";
@@ -65,13 +79,15 @@ class SaraShieldController extends GetxController {
 
       deviceName = await getDeviceName();
       String deviceType = getDeviceType();
+      String deviceBrowser = getBrowserName();
+      print("deviceBrowser===>${deviceBrowser}");
       Map<String, dynamic> map = {
         "MasterUrlId": cieraModel.masterUrlId, // "VYz433DfqQ5LhBcgaamnbw4Wy4K9CyQT",
         "RequestUrl": cieraModel.requestUrl, // "com.app.cyber_ceiara",
         "BrowserIdentity": udid,
         "DeviceIp": deviceIp,
         "DeviceType": deviceType,
-        "DeviceBrowser": 'Chrome',
+        "DeviceBrowser": deviceBrowser,
         "DeviceName": deviceName,
         "DeviceHeight": height.round(),
         "DeviceWidth": width.round(),
@@ -81,6 +97,7 @@ class SaraShieldController extends GetxController {
       Map<String, dynamic> valueMap = (responseAPI.response);
       if (valueMap["Message"] == "success") {
         GetInfoModel getInfoModel = GetInfoModel.fromJson(valueMap);
+        startCaptchaTimer();
         requestId.value = getInfoModel.requestId;
         visiterId.value = getInfoModel.visiterId;
       } else {
@@ -122,13 +139,21 @@ class SaraShieldController extends GetxController {
     isOtherLoading(true);
     error("");
     apiError("");
+    String protocol = "http";
+    if (kIsWeb) {
+      final String currentUrl = Uri.base.toString();
+      if (currentUrl.startsWith("https")) {
+        protocol = "https";
+      }
+    }
+
     Map<String, dynamic> map = {
       "MasterUrl": cieraModel.masterUrlId,
       "BrowserIdentity": udid,
       "DeviceIp": deviceIp,
       "DeviceName": deviceName,
-      "Protocol": "http",
-      "second": "5",
+      "Protocol": protocol,
+      "second": (timeSpentInSeconds <= 0 ? 1 : timeSpentInSeconds).toString(),
       "RequestID": requestId.value,
       "VisiterId": visiterId.value
     };

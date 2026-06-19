@@ -1,7 +1,7 @@
-import 'dart:html' as html;
 import 'dart:ui_web' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:web/web.dart' as web;
 
 /// Registers a custom HTML ImageElement for Flutter Web.
 /// This is mainly used to render image formats (such as GIFs)
@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 /// [viewId] -> Unique identifier used by HtmlElementView.
 void registerGifView(String url, String viewId) {
   ui.platformViewRegistry.registerViewFactory(viewId, (int id) {
-    return html.ImageElement()
+    return web.HTMLImageElement()
       ..src = url
       ..style.width = '100%'
       ..style.height = '100%'

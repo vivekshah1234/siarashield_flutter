@@ -1,4 +1,3 @@
-// import 'package:flutter_udid/flutter_udid.dart';
 import 'package:get/get.dart';
 import 'package:siarashield_flutter/constants/app_constant.dart';
 import 'package:siarashield_flutter/constants/dio_service.dart';
@@ -6,7 +5,8 @@ import 'package:siarashield_flutter/constants/dio_service.dart';
 import '../common/custom_widgets.dart';
 import '../models/response_api.dart';
 import '../services/generate_random_id.dart';
-import '../services/get_device_infomation.dart';
+import '../services/get_browser_name.dart';
+import '../services/get_device_information.dart';
 import '../services/get_ip_address.dart';
 import '../siarashield_flutter.dart';
 
@@ -21,6 +21,17 @@ class PopupController extends GetxController {
   String udid = "";
   RxBool isVerified = false.obs;
   RxString captchaUrl = "".obs;
+  DateTime? captchaOpenedAt;
+
+  void startCaptchaTimer() {
+    captchaOpenedAt = DateTime.now();
+  }
+
+  int get timeSpentInSeconds {
+    if (captchaOpenedAt == null) return 0;
+
+    return DateTime.now().difference(captchaOpenedAt!).inSeconds;
+  }
 
   /// Fetches a CAPTCHA challenge for user verification.
   ///
@@ -65,37 +76,52 @@ class PopupController extends GetxController {
     isOtherLoading(true);
     error("");
     captchaUrl("");
+    captchaOpenedAt = null;
     try {
       deviceIp = await getPublicIp() ?? "";
       udid = await generateBrowserIdentity();
       deviceName = await getDeviceName();
       deviceType = getDeviceType();
+      String deviceBrowser = getBrowserName();
+      // Map<String, dynamic> map = {
+      //   "MasterUrlId": cieraModel.masterUrlId, // "VYz433DfqQ5LhBcgaamnbw4Wy4K9CyQT",
+      //   "RequestUrl": cieraModel.requestUrl, // "com.app.cyber_ceiara",
+      //
+      //   "BrowserIdentity": udid,
+      //
+      //   "DeviceType": deviceType,
+      //
+      //   "DeviceName": deviceName,
+      //   "DeviceHeight": height.round(),
+      //   "DeviceWidth": width.round(),
+      //   "RequestID": requestId,
+      //   "VisiterId": visiterId,
+      //   "RequestType": "Open",
+      //   "PluginNo": 0,
+      //   "LanguageId": 1,
+      //   "LangChange": 0,
+      //   "ClickSecond": 1,
+      //   "Iscookie": 1,
+      //
+      //   // "DeviceIp": deviceIp,
+      //   // "DeviceBrowser": 'Chrome',
+      // };
       Map<String, dynamic> map = {
         "MasterUrlId": cieraModel.masterUrlId, // "VYz433DfqQ5LhBcgaamnbw4Wy4K9CyQT",
         "RequestUrl": cieraModel.requestUrl, // "com.app.cyber_ceiara",
-
         "BrowserIdentity": udid,
-
+        "DeviceIp": deviceIp,
         "DeviceType": deviceType,
-
+        "DeviceBrowser": deviceBrowser,
         "DeviceName": deviceName,
         "DeviceHeight": height.round(),
         "DeviceWidth": width.round(),
-        "RequestID": requestId,
         "VisiterId": visiterId,
-        "RequestType": "Open",
-        "PluginNo": 0,
-        "LanguageId": 1,
-        "LangChange": 0,
-        "ClickSecond": 1,
-        "Iscookie": 1,
-
-        // "DeviceIp": deviceIp,
-        // "DeviceBrowser": 'Chrome',
       };
       ResponseAPI responseAPI = await ApiManager.post(methodName: ApiConstant.captchaForAndroid, params: map);
       Map<String, dynamic> valueMap = responseAPI.response;
       if (valueMap["Message"] == "success") {
+        startCaptchaTimer();
         captchaUrl(valueMap["HtmlFormate"]);
       } else {
         toast("Api Error");
@@ -159,10 +185,10 @@ class PopupController extends GetxController {
         "Timespent": "24",
         "Protocol": "http",
         "Flag": "1",
-        "second": "2",
+        "second": (timeSpentInSeconds <= 0 ? 1 : timeSpentInSeconds).toString(),
         "RequestID": requestId,
         "VisiterId": visiterId,
-        "fillupsecond": "8"
+        "fillupsecond": (timeSpentInSeconds <= 0 ? 1 : timeSpentInSeconds).toString(),
       };
       ResponseAPI responseAPI = await ApiManager.post(methodName: ApiConstant.submitCaptchInfoForAndroid, params: map);
       Map<String, dynamic> valueMap = (responseAPI.response);

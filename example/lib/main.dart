@@ -136,9 +136,9 @@ class _MyAppState extends State<MyApp> {
                     }
                   },
                   cyberSiaraModel: CyberSiaraModel(
-                    masterUrlId: 'kMcFLdqYxN2j1HduZu6uO54hHjzKKBQz', //Master URl ID
-                    requestUrl: 'com.app.cyber_ceiara', //Package name,
-                    privateKey: "8KWfnvAJH9kfI9LlUwfBfg1gKP7ddGns", //Private Key
+                    masterUrlId: 'n4DFfNy9j1wc8wBQ82Ebq9y0FkU0ljmH', //Master URl ID
+                    requestUrl: 'http://localhost:54116/', //Package name or Browser Url,
+                    privateKey: "9edy9aPCyjx9GXOkZRaGUZYTQZk1AczF", //Private Key
                   ),
                 ),
               ),

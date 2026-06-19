@@ -42,7 +42,7 @@ CyberSiaraWidget(
   },
   cyberSiaraModel: CyberSiaraModel(
     masterUrlId: 'TEST-CYBERSIARA', // Master URL ID
-    requestUrl: 'com.app.testapp', // Package name
+    requestUrl: 'com.app.testapp', //Package name or Browser Url
     privateKey: 'TEST-CYBERSIARA', // Private Key
   ),
 ),
