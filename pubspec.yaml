@@ -24,7 +24,6 @@ dependencies:
   shared_preferences: ^2.3.5
   flutter_cache_manager: ^3.4.1
   http: ^1.6.0
-#  web: ^1.0.0
 
 dev_dependencies:
   flutter_test:
