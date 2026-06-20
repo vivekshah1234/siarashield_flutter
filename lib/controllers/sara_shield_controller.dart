@@ -80,7 +80,7 @@ class SaraShieldController extends GetxController {
       deviceName = await getDeviceName();
       String deviceType = getDeviceType();
       String deviceBrowser = getBrowserName();
-      print("deviceBrowser===>${deviceBrowser}");
+      // print("deviceBrowser===>${deviceBrowser}");
       Map<String, dynamic> map = {
         "MasterUrlId": cieraModel.masterUrlId, // "VYz433DfqQ5LhBcgaamnbw4Wy4K9CyQT",
         "RequestUrl": cieraModel.requestUrl, // "com.app.cyber_ceiara",
