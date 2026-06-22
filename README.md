@@ -42,11 +42,22 @@ CyberSiaraWidget(
   },
   cyberSiaraModel: CyberSiaraModel(
     masterUrlId: 'TEST-CYBERSIARA', // Master URL ID
-    requestUrl: 'com.app.testapp', //Package name or Browser Url
+    requestUrl: 'com.app.testapp', //Package name or Website Url
     privateKey: 'TEST-CYBERSIARA', // Private Key
   ),
 ),
 ```
+### requestUrl
+
+The value of `requestUrl` depends on the platform:
+
+| Platform | Value |
+|----------|-------|
+| Android | Application package name (e.g. `com.example.myapp`) |
+| iOS | Application bundle identifier (e.g. `com.example.myapp`) |
+| Web | Website URL/domain registered in SiaraShield (e.g. `https://example.com`) |
+
+> **Important:** The value provided in `requestUrl` must exactly match the application package name, bundle identifier, or website URL registered in the SiaraShield Portal.
 
 ## Parameters
 
