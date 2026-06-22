@@ -39,3 +39,7 @@
 ## 0.0.10
 
 * TODO: Bug Fixes on GIF
+
+## 0.0.11
+
+* TODO: Web Support Added.

@@ -1,6 +1,6 @@
 name: siarashield_flutter
 description: "siarashield_flutter is a package that enables authentication using SiaraShield in Flutter applications."
-version: 0.0.10
+version: 0.0.11
 homepage: https://github.com/vivekshah1234/siarashield_flutter
 
 environment:
