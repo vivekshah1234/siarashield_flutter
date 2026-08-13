@@ -43,3 +43,7 @@
 ## 0.0.11
 
 * TODO: Web Support Added.
+
+## 0.0.12
+
+* TODO: App Logo Change.
