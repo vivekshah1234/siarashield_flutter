@@ -55,7 +55,7 @@ class _PopupScreenState extends State<PopupScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Image.asset(
-                      ImageAssets.download,
+                      ImageAssets.logo,
                       scale: 6,
                       package: 'siarashield_flutter',
                     ),
@@ -94,7 +94,9 @@ class _PopupScreenState extends State<PopupScreen> {
                         onTap: () {
                           _changeCaptcha(controller);
                         },
-                        child: Image.asset(ImageAssets.refreshIcon, scale: 2.5, package: 'siarashield_flutter'),
+                        child: Image.asset(ImageAssets.refreshIcon, scale: 2.5, package: 'siarashield_flutter',
+                        color: AppColors.greyColor,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 5),
@@ -147,7 +149,7 @@ class _PopupScreenState extends State<PopupScreen> {
                         width: 5,
                       ),
                       Image.asset(
-                        ImageAssets.download,
+                        ImageAssets.logo,
                         scale: 8,
                         color: AppColors.greyColor,
                         package: 'siarashield_flutter',
@@ -157,7 +159,7 @@ class _PopupScreenState extends State<PopupScreen> {
                 ),
                 const Center(
                   child: Text(
-                    "Privacy Terms",
+                    "Privacy - Terms",
                     style: TextStyle(color: AppColors.blackColor, fontWeight: FontWeight.w400, fontSize: 14),
                   ),
                 ),
