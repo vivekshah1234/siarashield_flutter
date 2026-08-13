@@ -46,7 +46,7 @@ class _MyAppState extends State<MyApp> {
               Center(
                   child: Image.asset(
                 ImageAssets.logo,
-                scale: 1,
+                scale: 3,
                 package: 'siarashield_flutter',
               )),
               const SizedBox(
